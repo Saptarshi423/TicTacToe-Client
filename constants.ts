@@ -1,6 +1,10 @@
+type value = {
+  val:string,
+  color: any,
+}
 
 type input = {
-  [key: number]: string;
+  [key: number]: value;
 };
 
 
@@ -8,7 +12,7 @@ export interface ClientToServerEvents {
   broadcastClick : (res:{input:input, turn:string}) => void;
   broadcast_winEvent : (res:{winner: string}) => void;
   broadcast_resetEvent : ()=>void
-  test : (res:{msg:string}) => void,
+  test : (res:{msg:string, color:string}) => void,
   broadcast_socketToRoom_connected : (res:{msg:string, user_id:number})=>void
   broadcast_user_overflow : ()=>void
 }
