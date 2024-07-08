@@ -3,7 +3,7 @@ import logo from './logo.svg';
 import './App.css';
 
 import { io, Socket } from 'socket.io-client';
-import { ClientToServerEvents, ServerToClientEvents } from '../constants';
+import { ClientToServerEvents, ServerToClientEvents, ModalProps } from '../constants';
 
 const socket: Socket<ClientToServerEvents, ServerToClientEvents> = io("ws://localhost:5050");
 
@@ -53,6 +53,8 @@ type input = {
 //   clicked: (req:{input:input, turn:string}) => void;
 //   reset_Event : (req:input)=>void;
 // }
+
+
 
 
 const initialState: input | {} = {
@@ -162,6 +164,7 @@ function App() {
     console.log(winner)
     setWinner(res.winner);
     setTurn("X");
+    setShowModal(true);
   }
 
   // reset event
@@ -190,6 +193,7 @@ function App() {
   const broadcastHello = (res: { msg: string, color: string }) => {
     console.log(res.msg, res.color);
     setColor(res.color);
+
     //localStorage.setItem("Color", res.color);
   }
 
@@ -237,7 +241,7 @@ function App() {
         <option value="3">3</option>
       </select>
       <div className='btn-container'>
-        <p className='winner'>{winner ? `${winner} wins!!` : "   "}</p>
+        {/* <p className='winner'>{winner ? `${winner} wins!!` : "   "}</p> */}
         <div className='btn-wrapper'>
           <button className='btn' onClick={handleReset}>RESET</button>
         </div>
@@ -254,15 +258,21 @@ function App() {
         <div className='box' id="8" onClick={handleClick} style={{ color: input[8].color }}>{input[8].val}</div>
       </div>
 
-      {showModal && <Modal/>}
+      {showModal && <Modal winner={winner} setShowModal={setShowModal}/>}
     </div>
   );
 }
 
 
-const Modal = ()=>{
+const Modal = (props : ModalProps)=>{
+
   return (
-    <div className='overlay'></div>
+    <div className='overlay'>
+      <div className='overlay-box'>
+          <h1>{"User "+ props.winner + " WON !!"}</h1>
+          <button onClick={()=>props.setShowModal(false)}>OK</button>
+      </div>
+    </div>
   )
 }
 

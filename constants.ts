@@ -26,6 +26,13 @@ export interface ServerToClientEvents {
   reset_Event : (req:input)=>void;
 }
 
+export interface ModalProps {
+  winner:string|null,
+  setShowModal: React.Dispatch<React.SetStateAction<boolean>>
+}
+
+
+
 
 
 
