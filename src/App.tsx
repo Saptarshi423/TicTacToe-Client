@@ -3,7 +3,7 @@ import logo from './logo.svg';
 import './App.css';
 
 import { io, Socket } from 'socket.io-client';
-import { ClientToServerEvents, ServerToClientEvents, ModalProps } from '../constants';
+//import { ClientToServerEvents, ServerToClientEvents, ModalProps } from '../constants';
 
 const socket: Socket<ClientToServerEvents, ServerToClientEvents> = io("ws://localhost:5050");
 
@@ -17,42 +17,32 @@ type input = {
 };
 
 
-// export interface ClientToServerEvents {
-//   broadcastClick : (res:{input:input, turn:string}) => void;
-//   broadcast_winEvent : (res:{winner: string}) => void;
-//   broadcast_resetEvent : ()=>void
-//   test : (res:{msg:string, color:string}) => void,
-//   broadcast_socketToRoom_connected : (res:{msg:string, user_id:number})=>void
-//   broadcast_user_overflow : ()=>void
-// }
+export interface ClientToServerEvents {
+  broadcastClick : (res:{input:input, turn:string}) => void;
+  broadcast_winEvent : (res:{winner: string}) => void;
+  broadcast_resetEvent : ()=>void
+  test : (res:{msg:string, color:string}) => void,
+  broadcast_socketToRoom_connected : (res:{msg:string, user_id:number})=>void
+  broadcast_user_overflow : ()=>void
+  client_disconnected_Event : (res:{msg:string})=>void
+}
 
 
-// //Client to server side.
-// export interface ServerToClientEvents {
-//   join_room_Event : (req : {roomNumber:number}) => void
-//   win_Event : (req:{winner:string, callback : ()=>void})=>void;
-//   clicked: (req:{input:input, turn:string}) => void;
-//   reset_Event : (req:input)=>void;
-// }
+//Client to server side.
+export interface ServerToClientEvents {
+  join_room_Event : (req : {roomNumber:number}) => void
+  win_Event : (req:{winner:string, callback : ()=>void})=>void;
+  clicked: (req:{input:input, turn:string}) => void;
+  reset_Event : (req:input)=>void;
+}
 
-
-
-// //Server to client side.
-// export interface ClientToServerEvents {
-//   broadcastClick : (res:{input:input, turn:string}) => void;
-//   broadcast_winEvent : (res:{winner: string}) => void;
-//   broadcast_resetEvent : (res:input)=>void
-//   hello : (res:{msg:string}) => void
-// }
-
-
-// //Client to server side.
-// export interface ServerToClientEvents {
-//   join_room_Event : (req : {roomNumber:number}) => void
-//   win_Event : (req:{winner:string, callback : ()=>void})=>void;
-//   clicked: (req:{input:input, turn:string}) => void;
-//   reset_Event : (req:input)=>void;
-// }
+export interface ModalProps {
+  winner:string|null,
+  setShowModal: React.Dispatch<React.SetStateAction<boolean>>,
+  setWinner:React.Dispatch<React.SetStateAction<string | null>>,
+  msg: string| null,
+  reset: ()=>void
+}
 
 
 
@@ -79,13 +69,15 @@ function App() {
   const [winner, setWinner] = useState<string | null>(null);
   const [roomNumber, setRoomNumber] = useState<number | undefined>(undefined);
   const [color, setColor] = useState<string>("");
-  const [showModal, setShowModal] = useState<boolean>(false)
+  const [showModal, setShowModal] = useState<boolean>(false);
+  const [msg, setMsg] = useState<string | null>(null)
 
   // Look for a winner.
   const CheckWin = (): void => {
 
     const EmptyValue = (win: any): boolean => {
-      if ((input[win[0]].val == input[win[1]].val) && (input[win[1]].val == input[win[2]].val)) return input[win[0]].val.length === 0 ? false : true;
+      if ((input[win[0]].val == input[win[1]].val) && (input[win[1]].val == input[win[2]].val))
+        return input[win[0]].val.length === 0 ? false : true;
       return false;
     }
 
@@ -134,8 +126,8 @@ function App() {
     CheckWin();
   }
 
-
-  const handleReset = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>): void => {
+  // reset function
+  const reset = ()=>{
     setInput((prev: input) => {
       let newState: input = {};
       Object.keys(prev).forEach((val) => {
@@ -144,10 +136,13 @@ function App() {
 
       return newState
     })
+  }
 
+  // on reset click
+  const handleReset = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>): void => {
+    reset();
     setTurn("X");
     setWinner(null);
-    //setInput({...initialState})
     socket.emit("reset_Event", initialState);
   }
 
@@ -169,14 +164,7 @@ function App() {
 
   // reset event
   const handleBroadcasReset = () => {
-    setInput((prev: input) => {
-      let newState: input = {};
-      Object.keys(prev).forEach((val) => {
-        newState[Number(val)] = { val: "", color: "" };;
-      });
-
-      return newState
-    })
+    reset();
     setTurn("X");
     setWinner(null);
   }
@@ -190,11 +178,10 @@ function App() {
     socket.emit("join_room_Event", { roomNumber: roomToJoin })
   }
 
+  // get the color
   const broadcastHello = (res: { msg: string, color: string }) => {
     console.log(res.msg, res.color);
     setColor(res.color);
-
-    //localStorage.setItem("Color", res.color);
   }
 
   // On other web client joining
@@ -205,7 +192,13 @@ function App() {
 
   // User > 2
   const handleUserOverFlow = () => {
-    console.log("Can't connect to the given room as it is occupied.")
+    setShowModal(true);
+    setMsg("Can't connect to the given room as it is occupied.")
+  }
+
+  const handleClientDisconnect = (res:{msg:string})=>{
+    setShowModal(true);
+    setMsg(res.msg);
   }
 
   useEffect(() => {
@@ -218,7 +211,8 @@ function App() {
     socket.on("broadcast_resetEvent", handleBroadcasReset);
     socket.on("test", broadcastHello);
     socket.on("broadcast_socketToRoom_connected", broadCastSocketToRoomConnected);
-    socket.on("broadcast_user_overflow", handleUserOverFlow)
+    socket.on("broadcast_user_overflow", handleUserOverFlow);
+    socket.on("client_disconnected_Event", handleClientDisconnect)
 
     return () => {
       socket.off("broadcastClick", handleBroadCastClick);
@@ -226,53 +220,68 @@ function App() {
       socket.off("broadcast_resetEvent", handleBroadcasReset);
       socket.off("test", broadcastHello);
       socket.off("broadcast_socketToRoom_connected", broadCastSocketToRoomConnected);
-      socket.off("broadcast_user_overflow", handleUserOverFlow)
+      socket.off("broadcast_user_overflow", handleUserOverFlow);
+      socket.off("client_disconnected_Event", handleClientDisconnect)
     }
-  }, [])
+  }, []) // subscribe and unsubscribe on closure.
 
 
   return (
     <div className="App">
-      <h3>Select a room to join...</h3>
-      <select onChange={joinRoom}>
-        <option value="" disabled selected>---</option>
-        <option value="1">1</option>
-        <option value="2">2</option>
-        <option value="3">3</option>
-      </select>
-      <div className='btn-container'>
-        {/* <p className='winner'>{winner ? `${winner} wins!!` : "   "}</p> */}
-        <div className='btn-wrapper'>
-          <button className='btn' onClick={handleReset}>RESET</button>
+      <div className='application--wrapper'>
+        <div className='btn-container'>
+          <h3>Select a room to join...</h3>
+          <select onChange={joinRoom}>
+            <option value="" disabled selected>---</option>
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+          </select>
+          {/* <p className='winner'>{winner ? `${winner} wins!!` : "   "}</p> */}
+          <div className='btn-wrapper'>
+            <button className='btn' onClick={handleReset}>RESET</button>
+          </div>
         </div>
-      </div>
-      <div className='container'>
-        <div className='box' id="0" onClick={handleClick} style={{ color: input[0].color }}>{input[0].val}</div>
-        <div className='box' id="1" onClick={handleClick} style={{ color: input[1].color }}>{input[1].val}</div>
-        <div className='box' id="2" onClick={handleClick} style={{ color: input[2].color }}>{input[2].val}</div>
-        <div className='box' id="3" onClick={handleClick} style={{ color: input[3].color }}>{input[3].val}</div>
-        <div className='box' id="4" onClick={handleClick} style={{ color: input[4].color }}>{input[4].val}</div>
-        <div className='box' id="5" onClick={handleClick} style={{ color: input[5].color }}>{input[5].val}</div>
-        <div className='box' id="6" onClick={handleClick} style={{ color: input[6].color }}>{input[6].val}</div>
-        <div className='box' id="7" onClick={handleClick} style={{ color: input[7].color }}>{input[7].val}</div>
-        <div className='box' id="8" onClick={handleClick} style={{ color: input[8].color }}>{input[8].val}</div>
-      </div>
+        <div className='container--wrapper'>
+          <div className='container'>
+            <div className='box' id="0" onClick={handleClick} style={{ color: input[0].color }}>{input[0].val}</div>
+            <div className='box' id="1" onClick={handleClick} style={{ color: input[1].color }}>{input[1].val}</div>
+            <div className='box' id="2" onClick={handleClick} style={{ color: input[2].color }}>{input[2].val}</div>
+            <div className='box' id="3" onClick={handleClick} style={{ color: input[3].color }}>{input[3].val}</div>
+            <div className='box' id="4" onClick={handleClick} style={{ color: input[4].color }}>{input[4].val}</div>
+            <div className='box' id="5" onClick={handleClick} style={{ color: input[5].color }}>{input[5].val}</div>
+            <div className='box' id="6" onClick={handleClick} style={{ color: input[6].color }}>{input[6].val}</div>
+            <div className='box' id="7" onClick={handleClick} style={{ color: input[7].color }}>{input[7].val}</div>
+            <div className='box' id="8" onClick={handleClick} style={{ color: input[8].color }}>{input[8].val}</div>
+          </div>
+        </div>
 
-      {showModal && <Modal winner={winner} setShowModal={setShowModal}/>}
+        {showModal && <Modal winner={winner} setShowModal={setShowModal} setWinner={setWinner} msg={msg} reset={reset}/>}
+      </div>
     </div>
   );
 }
 
 
-const Modal = (props : ModalProps)=>{
+const Modal = (props: ModalProps) => {
 
+  const displayMsg = (): string | null => {
+    if (props.winner) {
+      return "User " + props.winner + " WON !!"
+    }
+    return props.msg
+  }
   return (
     <div className='overlay'>
       <div className='overlay-box'>
-          <h1>{"User "+ props.winner + " WON !!"}</h1>
-          <button onClick={()=>props.setShowModal(false)}>OK</button>
+        <h1>{displayMsg()}</h1>
+        <button onClick={() => {
+          props.setShowModal(false);
+          props.setWinner(null);
+          props.reset();
+        }}>OK</button>
       </div>
-    </div>
+    </div >
   )
 }
 

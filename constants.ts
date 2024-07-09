@@ -15,6 +15,7 @@ export interface ClientToServerEvents {
   test : (res:{msg:string, color:string}) => void,
   broadcast_socketToRoom_connected : (res:{msg:string, user_id:number})=>void
   broadcast_user_overflow : ()=>void
+  //client-disconnected_Event : ()=>void
 }
 
 
@@ -28,7 +29,10 @@ export interface ServerToClientEvents {
 
 export interface ModalProps {
   winner:string|null,
-  setShowModal: React.Dispatch<React.SetStateAction<boolean>>
+  setShowModal: React.Dispatch<React.SetStateAction<boolean>>,
+  setWinner:React.Dispatch<React.SetStateAction<string | null>>,
+  msg: string| null,
+  reset: ()=>void
 }
 
 
