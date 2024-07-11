@@ -4,11 +4,7 @@ import './App.css';
 
 import { io, Socket } from 'socket.io-client';
 import { ClientToServerEvents, ServerToClientEvents, ModalProps } from '../constants';
-
-
-const URL : any = process.env.NODE_ENV === 'production' ? process.env.REACT_APP_BACKEND_PRODUCTION : process.env.REACT_APP_BACKEND_DEV;
-console.log("URL IS",URL)
-const socket: Socket<ClientToServerEvents, ServerToClientEvents> = io(URL);
+import {socket} from './socket';
 
 type value = {
   val: string,
@@ -18,37 +14,6 @@ type value = {
 type input = {
   [key: number]: value;
 };
-
-
-// export interface ClientToServerEvents {
-//   broadcastClick: (res: { input: input, turn: string }) => void;
-//   broadcast_winEvent: (res: { winner: string }) => void;
-//   broadcast_resetEvent: () => void
-//   test: (res: { msg: string, color: string }) => void,
-//   broadcast_socketToRoom_connected: (res: { msg: string, user_id: number }) => void
-//   broadcast_user_overflow: () => void
-//   client_disconnected_Event: (res: { msg: string }) => void
-// }
-
-
-// //Client to server side.
-// export interface ServerToClientEvents {
-//   join_room_Event: (req: { roomNumber: number }) => void
-//   win_Event: (req: { winner: string, callback: () => void }) => void;
-//   clicked: (req: { input: input, turn: string }) => void;
-//   reset_Event: (req: input) => void;
-// }
-
-// export interface ModalProps {
-//   winner: string | null,
-//   setShowModal: React.Dispatch<React.SetStateAction<boolean>>,
-//   setWinner: React.Dispatch<React.SetStateAction<string | null>>,
-//   msg: string | null,
-//   reset: () => void
-// }
-
-
-
 
 const initialState: input | {} = {
   0: { val: "", color: "red" },
