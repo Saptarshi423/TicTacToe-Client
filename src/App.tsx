@@ -3,9 +3,12 @@ import logo from './logo.svg';
 import './App.css';
 
 import { io, Socket } from 'socket.io-client';
-//import { ClientToServerEvents, ServerToClientEvents, ModalProps } from '../constants';
+import { ClientToServerEvents, ServerToClientEvents, ModalProps } from '../constants';
 
-const socket: Socket<ClientToServerEvents, ServerToClientEvents> = io("ws://localhost:5050");
+
+const URL : any = process.env.NODE_ENV === 'production' ? process.env.REACT_APP_BACKEND_PRODUCTION : process.env.REACT_APP_BACKEND_DEV;
+console.log("URL IS",URL)
+const socket: Socket<ClientToServerEvents, ServerToClientEvents> = io(URL);
 
 type value = {
   val: string,
@@ -17,32 +20,32 @@ type input = {
 };
 
 
-export interface ClientToServerEvents {
-  broadcastClick : (res:{input:input, turn:string}) => void;
-  broadcast_winEvent : (res:{winner: string}) => void;
-  broadcast_resetEvent : ()=>void
-  test : (res:{msg:string, color:string}) => void,
-  broadcast_socketToRoom_connected : (res:{msg:string, user_id:number})=>void
-  broadcast_user_overflow : ()=>void
-  client_disconnected_Event : (res:{msg:string})=>void
-}
+// export interface ClientToServerEvents {
+//   broadcastClick: (res: { input: input, turn: string }) => void;
+//   broadcast_winEvent: (res: { winner: string }) => void;
+//   broadcast_resetEvent: () => void
+//   test: (res: { msg: string, color: string }) => void,
+//   broadcast_socketToRoom_connected: (res: { msg: string, user_id: number }) => void
+//   broadcast_user_overflow: () => void
+//   client_disconnected_Event: (res: { msg: string }) => void
+// }
 
 
-//Client to server side.
-export interface ServerToClientEvents {
-  join_room_Event : (req : {roomNumber:number}) => void
-  win_Event : (req:{winner:string, callback : ()=>void})=>void;
-  clicked: (req:{input:input, turn:string}) => void;
-  reset_Event : (req:input)=>void;
-}
+// //Client to server side.
+// export interface ServerToClientEvents {
+//   join_room_Event: (req: { roomNumber: number }) => void
+//   win_Event: (req: { winner: string, callback: () => void }) => void;
+//   clicked: (req: { input: input, turn: string }) => void;
+//   reset_Event: (req: input) => void;
+// }
 
-export interface ModalProps {
-  winner:string|null,
-  setShowModal: React.Dispatch<React.SetStateAction<boolean>>,
-  setWinner:React.Dispatch<React.SetStateAction<string | null>>,
-  msg: string| null,
-  reset: ()=>void
-}
+// export interface ModalProps {
+//   winner: string | null,
+//   setShowModal: React.Dispatch<React.SetStateAction<boolean>>,
+//   setWinner: React.Dispatch<React.SetStateAction<string | null>>,
+//   msg: string | null,
+//   reset: () => void
+// }
 
 
 
@@ -107,6 +110,7 @@ function App() {
     //update the input value.
     input[id].val = turn;
 
+    //update the input color
     input[id].color = color ?? "red";
 
     //update the turn
@@ -127,7 +131,7 @@ function App() {
   }
 
   // reset function
-  const reset = ()=>{
+  const reset = () => {
     setInput((prev: input) => {
       let newState: input = {};
       Object.keys(prev).forEach((val) => {
@@ -196,7 +200,7 @@ function App() {
     setMsg("Can't connect to the given room as it is occupied.")
   }
 
-  const handleClientDisconnect = (res:{msg:string})=>{
+  const handleClientDisconnect = (res: { msg: string }) => {
     setShowModal(true);
     setMsg(res.msg);
   }
@@ -229,7 +233,9 @@ function App() {
   return (
     <div className="App">
       <div className='application--wrapper'>
+
         <div className='btn-container'>
+          {/* <button className='leave-btn'>Leave</button> */}
           <h3>Select a room to join...</h3>
           <select onChange={joinRoom}>
             <option value="" disabled selected>---</option>
@@ -239,7 +245,7 @@ function App() {
           </select>
           {/* <p className='winner'>{winner ? `${winner} wins!!` : "   "}</p> */}
           <div className='btn-wrapper'>
-            <button className='btn' onClick={handleReset}>RESET</button>
+            <button className='reset-btn' onClick={handleReset}>RESET</button>
           </div>
         </div>
         <div className='container--wrapper'>
@@ -256,7 +262,7 @@ function App() {
           </div>
         </div>
 
-        {showModal && <Modal winner={winner} setShowModal={setShowModal} setWinner={setWinner} msg={msg} reset={reset}/>}
+        {showModal && <Modal winner={winner} setShowModal={setShowModal} setWinner={setWinner} msg={msg} reset={reset} />}
       </div>
     </div>
   );

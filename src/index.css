@@ -46,16 +46,29 @@ code {
 
 .btn-container {
   padding: 1rem;
+  position: relative;
 }
 
-.btn-wrapper{
+/* .leave-btn {
+  position: absolute;
+  right: 4%;
+  top: 20%;
+  border-radius: 10px;
+  cursor: pointer;
+} */
+
+.reset-btn{
+  cursor: pointer;
+}
+
+.btn-wrapper {
   margin-top: 2rem;
 }
 
 .overlay {
   position: absolute;
   z-index: 2;
-  top:0%;
+  top: 0%;
   background: #c7c7c089;
   height: 100vh;
   width: 100vw;
@@ -65,17 +78,17 @@ code {
 }
 
 @media only screen and (max-width: 600px) {
-  .box{
+  .box {
     padding: 50px !important;
   }
 
-  .App{
+  .App {
     height: 100vh;
   }
 }
 
 @media only screen and (max-width: 420px) {
-  .box{
+  .box {
     padding: 35px !important;
   }
 }
