@@ -1,0 +1,108 @@
+.login-form__container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  height: 420px;
+  width: 500px;
+  border-radius: 20px;
+  margin: 20px auto;
+  padding: 40px 50px;
+  max-width: 300px;
+  border-radius: 5px;
+  background: #fff;
+  box-shadow: 1px 1px 1px #666;
+}
+
+.login-form__strip {
+  width: 100%;
+  height: 10px;
+  /* background-color: coral; */
+  border-radius: 50px;
+  border-color: 1px solid black;
+}
+
+.login-form {
+  margin-top: 10%;
+  height: 90%;
+  align-content: center;
+}
+
+.form-div {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+}
+
+.form-input {
+  /* height: 20px; */
+  width: 100%;
+  display: block;
+  box-sizing: border-box;
+  margin: 10px 0;
+  padding: 14px 12px;
+  font-size: 16px;
+  border-radius: 2px;
+  font-family: Raleway, sans-serif;
+  border-style: 2px solid rgb(190, 59, 59);
+}
+.logIn__btn {
+  width: 100%;
+  height: 30px;
+  border: none;
+  background: #ef5350;
+  color: white;
+  font-weight: bold;
+  transition: 0.2s;
+  margin: 20px 0px;
+  border-radius: 10px;
+}
+.logIn__btn:hover {
+  transition: 0.5s ease-in-out;
+  scale: 1.1;
+  cursor: pointer;
+  border-radius: 10px;
+}
+
+.signup{
+  margin: 0px;
+}
+
+input[type="text"],
+input[type="password"] {
+  border: 1px solid #c0c0c0;
+  transition: 0.2s;
+}
+
+.form-div input[type=text]:hover {
+  border-color: #F44336;
+  outline: none;
+  transition: all .2s ease-in-out;
+} 
+
+.bottom__strip {
+  width: 100%;
+  height: 2px;
+  margin: 20px;
+  border-radius: 50px;
+  background-color: rgb(223, 220, 220);
+}
+
+.authlogIn__btn {
+  border-radius: 50px;
+  background: transparent;
+  cursor: pointer;
+  border-style: none;
+}
+
+.login-form__container h2 {
+  margin: 20px 0 0;
+  color: #ef5350;
+  font-size: 28px;
+}
+
+.login-form__container p {
+  margin-bottom: -40px;
+}
