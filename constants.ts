@@ -1,9 +1,9 @@
-type value = {
+export type value = {
   val: string;
   color: any;
 };
 
-type input = {
+export type input = {
   [key: number]: value;
 };
 

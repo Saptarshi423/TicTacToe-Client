@@ -4,9 +4,9 @@ import './FormInput.css';
 import GoogleImage from '../../assets/google.png';
 import { FormInputProps } from '../../../constants';
 import { useNavigate } from 'react-router-dom';
-import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "firebase/auth";
 import { changeEvent } from '../../../constants';
 import { auth } from '../../firebase-config';
+import { signIn, logIn } from '../../utils';
 
 
 
@@ -31,39 +31,27 @@ const FormInput: React.FC<FormInputProps> = ({ isLogin }) => {
 
     const handleSubmit = () => {
 
-        if (!isLogin) {
-            if (userDetails.email === '' || userDetails.password === '') {
-                console.log("User creds not entered.")
-                return;
-            }
-            createUserWithEmailAndPassword(auth, userDetails.email, userDetails.password)
-                .then((userCredential) => {
-                    // Signed up 
-                    const user = userCredential.user;
-                    setUser(user)
+        const val: number = isLogin ? 1 : 0; //Login ->1, SignUp->0
+
+        switch (val) {
+            case 0:
+                let resp: any = signIn(userDetails.email, userDetails.password, auth);
+                if (resp !== undefined) {
+                    setUser(resp.user);
                     navigate('/')
-                    // ...
-                })
-                .catch((error) => {
-                    console.log(error)
-                    const errorCode = error.code;
-                    const errorMessage = error.message;
-                    // ..
-                });
-        } else {
-            signInWithEmailAndPassword(auth, userDetails.email, userDetails.password)
-                .then((userCredential) => {
-                    // Signed in 
-                    const user = userCredential.user;
+                }
+                return;
+            case 1:
+                let resp2: any = logIn(userDetails.email, userDetails.password, auth);
+
+                if (resp2 !== undefined) {
                     localStorage.setItem('loggedIn', JSON.stringify(true));
                     navigate('/play')
-                    // ...
-                })
-                .catch((error) => {
-                    console.log(error)
-                    const errorCode = error.code;
-                    const errorMessage = error.message;
-                });
+                }
+                return;
+            default:
+                break;
+
         }
     }
     return (

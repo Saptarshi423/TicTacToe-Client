@@ -1,19 +1,9 @@
-import React, { ChangeEvent, useEffect, useState } from 'react';
-import logo from './logo.svg';
+import React, { useEffect, useState } from 'react';
 import '../../App.css';
-
-import { io, Socket } from 'socket.io-client';
-import { ClientToServerEvents, ServerToClientEvents, ModalProps } from '../../../constants';
+import {ModalProps, input } from '../../../constants';
 import { socket } from '../../socket';
+import { getBestMove } from '../../utils';
 
-type value = {
-  val: string,
-  color: any,
-}
-
-type input = {
-  [key: number]: value;
-};
 
 const initialState: input | {} = {
   0: { val: "", color: "red" },
@@ -30,7 +20,7 @@ const initialState: input | {} = {
 const wins: number[][] = [[0, 1, 2], [3, 4, 5], [6, 7, 8], [0, 3, 6], [1, 4, 7], [2, 5, 8], [0, 4, 8], [2, 4, 6]];
 
 function Play() {
-
+  const [useAI, setUseAI] = useState<boolean>(true);
   const [input, setInput] = useState<input>(initialState);
 
   const [turn, setTurn] = useState<string>("X");
@@ -67,32 +57,49 @@ function Play() {
   }
 
   const handleClick = (e: React.MouseEvent<HTMLDivElement, MouseEvent> | undefined = undefined): void => {
-    const id = Number((e?.target as HTMLDivElement).id);
-    if (input[id].val !== "") {
-      return;
+    const id = e ? Number((e?.target as HTMLDivElement).id) : null;
+
+    if (id! == null && typeof (id) === 'number') {
+      if (input[id].val !== "") return;
     }
 
-    //update the input value.
-    input[id].val = turn;
+    if (id !== null) {
+      //update the input value.
+      input[id].val = turn;
 
-    //update the input color
-    input[id].color = color ?? "red";
+      //update the input color
+      input[id].color = color ?? "red";
 
-    //update the turn
-    setTurn((prev: string): string => {
-      if (prev === "X") return "O";
-      return "X"
-    })
+      //update the turn
+      setTurn((prev: string): string => {
+        if (prev === "X") return "O";
+        return "X"
+      })
 
-    let req: { input: input, turn: string } = {
-      input,
-      turn,
+      let req: { input: input, turn: string } = {
+        input,
+        turn,
+      }
+
+      socket.emit("clicked", req);
+
+      // Look if someone won the game.
+      CheckWin();
     }
 
-    socket.emit("clicked", req);
+    if (useAI) {
+      const aiMove = getBestMove(input, "O", "X", wins);
+      if (aiMove !== null) {
+        setTimeout(() => {
+          input[aiMove].val = "O";
+          input[aiMove].color = "blue";
+          setInput({ ...input }); // Trigger state update
+          setTurn("X"); // Switch turn back to human
+          CheckWin();
+        }, 500); // Simulate AI thinking delay
+      }
+    }
 
-    // Look if someone won the game.
-    CheckWin();
   }
 
   // reset function
@@ -201,7 +208,7 @@ function Play() {
 
         <div className='btn-container'>
           {/* <button className='leave-btn'>Leave</button> */}
-          <h3>Select a room to join...</h3>
+          <h3>Join a room with your friend and play multiplayer</h3>
           <select onChange={joinRoom}>
             <option value="" disabled selected>---</option>
             <option value="1">1</option>
