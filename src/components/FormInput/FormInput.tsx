@@ -29,21 +29,20 @@ const FormInput: React.FC<FormInputProps> = ({ isLogin }) => {
         setuserDetails({ ...userDetails, password: value })
     }
 
-    const handleSubmit = () => {
+    const handleSubmit = async ()  => {
 
         const val: number = isLogin ? 1 : 0; //Login ->1, SignUp->0
 
         switch (val) {
             case 0:
-                let resp: any = signIn(userDetails.email, userDetails.password, auth);
+                let resp: any = await signIn(userDetails.email, userDetails.password, auth);
                 if (resp !== undefined) {
                     setUser(resp.user);
                     navigate('/')
                 }
                 return;
             case 1:
-                let resp2: any = logIn(userDetails.email, userDetails.password, auth);
-
+                let resp2: any = await logIn(userDetails.email, userDetails.password, auth);
                 if (resp2 !== undefined) {
                     localStorage.setItem('loggedIn', JSON.stringify(true));
                     navigate('/play')
@@ -62,7 +61,7 @@ const FormInput: React.FC<FormInputProps> = ({ isLogin }) => {
             <div className='login-form'>
                 <div className='form-div'>
                     <input placeholder='username' className='form-input' type='text' onChange={(e) => { handleUsername(e) }} value={userDetails.email} />
-                    <input placeholder='password' className='form-input' type='text' onChange={(e) => { handlePassword(e) }} value={userDetails.password} />
+                    <input placeholder='password' className='form-input' type='password' onChange={(e) => { handlePassword(e) }} value={userDetails.password} />
                     <button className='logIn__btn' onClick={handleSubmit}>{isLogin ? "Log In" : "Sign Up"}</button>
                     {isLogin && <button className='logIn__btn signup' onClick={() => { navigate('/register') }}>Sign Up</button>}
 

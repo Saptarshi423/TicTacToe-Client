@@ -1,8 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import '../../App.css';
-import {ModalProps, input } from '../../../constants';
+import { input } from '../../../constants';
 import { socket } from '../../socket';
 import { getBestMove } from '../../utils';
+import Modal from '../../components/Modal/Modal';
+import { useNavigate } from 'react-router-dom';
+import { useAuth0, User } from "@auth0/auth0-react";
 
 
 const initialState: input | {} = {
@@ -17,10 +20,21 @@ const initialState: input | {} = {
   8: { val: "", color: "red" },
 }
 
-const wins: number[][] = [[0, 1, 2], [3, 4, 5], [6, 7, 8], [0, 3, 6], [1, 4, 7], [2, 5, 8], [0, 4, 8], [2, 4, 6]];
+const wins: number[][] = [
+  [0, 1, 2],
+  [3, 4, 5],
+  [6, 7, 8],
+  [0, 3, 6],
+  [1, 4, 7],
+  [2, 5, 8],
+  [0, 4, 8],
+  [2, 4, 6]
+];
 
 function Play() {
-  const [useAI, setUseAI] = useState<boolean>(true);
+  const { logout, isAuthenticated } = useAuth0();
+
+  const [useAI, setUseAI] = useState<boolean>(false);
   const [input, setInput] = useState<input>(initialState);
 
   const [turn, setTurn] = useState<string>("X");
@@ -28,10 +42,13 @@ function Play() {
   const [roomNumber, setRoomNumber] = useState<number | undefined>(undefined);
   const [color, setColor] = useState<string>("");
   const [showModal, setShowModal] = useState<boolean>(false);
-  const [msg, setMsg] = useState<string | null>(null)
+  const [msg, setMsg] = useState<string | null>(null);
+
+  const navigate = useNavigate();
 
   // Look for a winner.
   const CheckWin = (): void => {
+    if(winner) return;
 
     const EmptyValue = (win: any): boolean => {
       if ((input[win[0]].val == input[win[1]].val) && (input[win[1]].val == input[win[2]].val))
@@ -43,6 +60,10 @@ function Play() {
     wins.forEach((win: number[]): void => {
       if ((input[win[0]].val == input[win[1]].val) && (input[win[1]].val === input[win[2]].val) && EmptyValue(win)) {
         setWinner(input[win[0]].val);
+        if (useAI) {
+          setShowModal(true);
+          return;
+        }
 
         //Create a req object to send.
         let req_obj: { winner: string, callback: () => void } = {
@@ -91,11 +112,13 @@ function Play() {
       const aiMove = getBestMove(input, "O", "X", wins);
       if (aiMove !== null) {
         setTimeout(() => {
-          input[aiMove].val = "O";
-          input[aiMove].color = "blue";
-          setInput({ ...input }); // Trigger state update
-          setTurn("X"); // Switch turn back to human
-          CheckWin();
+          if (!winner) {
+            input[aiMove].val = "O";
+            input[aiMove].color = "blue";
+            setInput({ ...input }); // Trigger state update
+            setTurn("X"); // Switch turn back to human
+            CheckWin();
+          }
         }, 500); // Simulate AI thinking delay
       }
     }
@@ -115,7 +138,7 @@ function Play() {
   }
 
   // on reset click
-  const handleReset = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>): void => {
+  const handleReset = (): void => {
     reset();
     setTurn("X");
     setWinner(null);
@@ -201,6 +224,10 @@ function Play() {
     }
   }, []) // subscribe and unsubscribe on closure.
 
+  useEffect(() => {
+    handleReset();
+  }, [useAI])
+
 
   return (
     <div className="App">
@@ -219,6 +246,19 @@ function Play() {
           <div className='btn-wrapper'>
             <button className='reset-btn' onClick={handleReset}>RESET</button>
           </div>
+          <div className='logout-wrapper'>
+            <button className='logout-btn' onClick={() => {
+              // user auhtorised via auth0.
+              if (isAuthenticated) {
+                logout({ logoutParams: { returnTo: window.location.origin } });
+                return;
+              }
+
+              // User sign up and logs in through creds stored in firebase.
+              localStorage.setItem("loggedIn", "false");
+              navigate('/')
+            }}>Logout</button>
+          </div>
         </div>
         <div className='container--wrapper'>
           <div className='container'>
@@ -233,34 +273,11 @@ function Play() {
             <div className='box' id="8" onClick={handleClick} style={{ color: input[8].color }}>{input[8].val}</div>
           </div>
         </div>
-
+        <h2>🤖 v/s 👱‍♂️  <input type='checkbox' style={{ width: '15px', height: '15px' }} onClick={(e) => { setUseAI(!useAI) }} /></h2>
         {showModal && <Modal winner={winner} setShowModal={setShowModal} setWinner={setWinner} msg={msg} reset={reset} />}
       </div>
     </div>
   );
-}
-
-
-const Modal = (props: ModalProps) => {
-
-  const displayMsg = (): string | null => {
-    if (props.winner) {
-      return "User " + props.winner + " WON !!"
-    }
-    return props.msg
-  }
-  return (
-    <div className='overlay'>
-      <div className='overlay-box'>
-        <h1>{displayMsg()}</h1>
-        <button onClick={() => {
-          props.setShowModal(false);
-          props.setWinner(null);
-          props.reset();
-        }}>OK</button>
-      </div>
-    </div >
-  )
 }
 
 export default Play;
