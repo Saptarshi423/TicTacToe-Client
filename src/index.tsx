@@ -10,7 +10,7 @@ const providerConfig = {
   domain: config.domain,
   clientId: config.clientId,
   authorizationParams: {
-    redirect_uri: 'http://localhost:3000/play'
+    redirect_uri: process.env.NODE_ENV === 'development' ? 'http://localhost:3000/play' : 'https://tic-tac-toe-client-git-main-saptarshi423s-projects.vercel.app/play'
   }
 };
 
