@@ -14,7 +14,7 @@ code {
 
 .App {
   width: 100%;
-  background-color: rgb(226 232 239);
+  background-color: rgb(255 240 233);
   height: 100vh;
 }
 
@@ -42,10 +42,11 @@ code {
   padding: 80px;
   font-size: 30px;
   text-align: center;
+  background: #ffffff;
 }
 
 .btn-container {
-  padding: 1rem;
+  padding: 5rem;
   position: relative;
 }
 
@@ -57,12 +58,12 @@ code {
   cursor: pointer;
 } */
 
-.reset-btn{
+.reset-btn {
   cursor: pointer;
 }
 
 .btn-wrapper {
-  margin-top: 2rem;
+  margin-top: 1rem;
 }
 
 .overlay {
@@ -75,6 +76,26 @@ code {
   display: flex;
   justify-content: center;
   align-items: center;
+}
+
+.logout-wrapper {
+  position: absolute;
+  top: 10%;
+  right: 4%;
+}
+
+.logout-btn {
+  width: 80px;
+  height: 30px;
+  background-color: coral;
+  border-radius: 20px;
+  border: none;
+  cursor: pointer;
+}
+
+.logout-btn:hover {
+  transition: 0.5s ease-out;
+  scale: 1.2;
 }
 
 @media only screen and (max-width: 600px) {
