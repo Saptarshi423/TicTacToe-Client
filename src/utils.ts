@@ -5,10 +5,14 @@ import {
 import { Auth } from "firebase/auth";
 import { input } from "../constants";
 
-async function signIn(email: string, password: string, auth: Auth) {
+async function signIn(
+  email: string,
+  password: string,
+  auth: Auth
+): Promise<any> {
   if (email === "" || password === "") {
     console.log("User creds not entered.");
-    return;
+    return undefined;
   }
 
   let ret: any = undefined;
@@ -27,10 +31,15 @@ async function signIn(email: string, password: string, auth: Auth) {
   return ret;
 }
 
-async function logIn(email: string, password: string, auth: Auth) {
+async function logIn(
+  email: string,
+  password: string,
+  auth: Auth
+): Promise<any> {
   if (email === "" || password === "") {
     console.log("User creds not entered.");
-    return;
+    console.log({ email, password });
+    return undefined;
   }
 
   let ret: any = undefined;
@@ -44,13 +53,12 @@ async function logIn(email: string, password: string, auth: Auth) {
     ret = {
       user: userCredential.user,
     };
+    return ret;
   } catch (error) {
     console.log(error);
     ret = undefined;
+    return ret;
   }
-
-  //return
-  return ret;
 }
 
 const getBestMove = (
@@ -59,9 +67,24 @@ const getBestMove = (
   opponentTurn: string,
   wins: number[][]
 ): number | null => {
-  const emptyCells = Object.keys(board)
-    .map(Number)
-    .filter((index) => board[index].val === "");
+  
+  // Check if there is already a winner
+  const checkForWinner = (turn: string): boolean => {
+    for (let win of wins) {
+      const [a, b, c] = win;
+      const values = [board[a].val, board[b].val, board[c].val];
+      if (values.every((v) => v === turn)) {
+        return true; // Win condition met
+      }
+    }
+    return false;
+  };
+
+  // Return null if win conditions are already met
+  if (checkForWinner(aiTurn) || checkForWinner(opponentTurn)) {
+    return null;
+  }
+  const emptyCells = Object.keys(board).map(Number).filter((index) => board[index].val === "");
 
   // Helper to check for winning move
   const findWinningMove = (turn: string): number | null => {
