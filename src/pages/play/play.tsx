@@ -173,6 +173,7 @@ function Play() {
   const joinRoom = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const roomToJoin = Number((e.target as HTMLSelectElement).value);
     setRoomNumber(roomToJoin);
+    setUseAI(false)
     console.log(roomToJoin)
     socket.emit("join_room_Event", { roomNumber: roomToJoin })
   }
@@ -248,7 +249,7 @@ function Play() {
           </div>
           <div className='logout-wrapper'>
             <button className='logout-btn' onClick={() => {
-              // user auhtorised via auth0.
+              // user auhtorised through auth0.
               if (isAuthenticated) {
                 logout({ logoutParams: { returnTo: window.location.origin } });
                 return;
@@ -273,7 +274,7 @@ function Play() {
             <div className='box' id="8" onClick={handleClick} style={{ color: input[8].color }}>{input[8].val}</div>
           </div>
         </div>
-        <h2>🤖 v/s 👱‍♂️  <input type='checkbox' style={{ width: '15px', height: '15px' }} onClick={(e) => { setUseAI(!useAI) }} /></h2>
+        <h2>🤖 v/s 👱‍♂️  <input type='checkbox' style={{ width: '15px', height: '15px' }} onClick={(e) => { setUseAI(!useAI) }} checked={useAI}/></h2>
         {showModal && <Modal winner={winner} setShowModal={setShowModal} setWinner={setWinner} msg={msg} reset={reset} />}
       </div>
     </div>
