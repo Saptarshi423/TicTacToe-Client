@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import '../../App.css';
 import { input } from '../../../constants';
-import { socket } from '../../socket';
+import { socket, URL } from '../../socket';
 import { getBestMove } from '../../utils';
 import Modal from '../../components/Modal/Modal';
 import { useNavigate } from 'react-router-dom';
 import { useAuth0, User } from "@auth0/auth0-react";
+import axios from 'axios';
 
 
 const initialState: input | {} = {
@@ -43,6 +44,8 @@ function Play() {
   const [color, setColor] = useState<string>("");
   const [showModal, setShowModal] = useState<boolean>(false);
   const [msg, setMsg] = useState<string | null>(null);
+
+  const [serverDown,setServerDown] = useState<boolean>(false)
 
   const navigate = useNavigate();
 
@@ -201,6 +204,24 @@ function Play() {
     setMsg(res.msg);
   }
 
+  const getServerStatus = async ()=>{
+    
+    try {
+      let resp = await axios.get(URL+'/status');
+      if(resp.status === 200){}
+      setServerDown(false)
+    } catch (error) {
+      console.log(error);
+      setServerDown(true)
+    }
+    finally{
+      setTimeout(()=>{
+        getServerStatus();
+      },2000)
+    }
+
+  }
+
   useEffect(() => {
     socket.on("connect", () => {
       console.log("connected...")
@@ -227,7 +248,11 @@ function Play() {
 
   useEffect(() => {
     handleReset();
-  }, [useAI])
+  }, [useAI]);
+
+  useEffect(()=>{
+    getServerStatus()
+  },[]) //on mount
 
 
   return (
@@ -236,7 +261,7 @@ function Play() {
 
         <div className='btn-container'>
           {/* <button className='leave-btn'>Leave</button> */}
-          <h3>Join a room with your friend and play multiplayer</h3>
+          <h3 style={{fontFamily:"Verdana"}}>Join a room with your friend 🎮</h3>
           <select onChange={joinRoom}>
             <option value="" disabled selected>---</option>
             <option value="1">1</option>
@@ -259,6 +284,8 @@ function Play() {
               localStorage.setItem("loggedIn", "false");
               navigate('/')
             }}>Logout</button>
+
+            <p style={{margin:"3px -22px 0px 10px", fontFamily:"Verdana"}}>{serverDown ? '⚠':'✅'}</p>
           </div>
         </div>
         <div className='container--wrapper'>
