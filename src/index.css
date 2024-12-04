@@ -14,12 +14,11 @@ code {
 
 .App {
   width: 100%;
-  background-color: rgb(255 240 233);
-  height: 100vh;
+  background-image: url('../src/assets/wp4075975.jpg.webp');
 }
 
 .application--wrapper {
-  /* //height: 100vh; */
+  height: 100vh;
 }
 
 .container--wrapper {
@@ -38,11 +37,11 @@ code {
 .box {
   height: 20px;
   width: 25px;
-  border: 1px solid black;
+  border: 2px solid #9577d5;
   padding: 80px;
   font-size: 30px;
   text-align: center;
-  background: #ffffff;
+  background: #a6c2f4;
 }
 
 .btn-container {
@@ -59,7 +58,13 @@ code {
 } */
 
 .reset-btn {
+  width: 55px;
+  height: 25px;
+  background-color: coral;
+  border-radius: 20px;
+  border: none;
   cursor: pointer;
+  font-family:Verdana
 }
 
 .btn-wrapper {
@@ -79,9 +84,10 @@ code {
 }
 
 .logout-wrapper {
+  display: flex;
   position: absolute;
   top: 10%;
-  right: 4%;
+  right: 2%;
 }
 
 .logout-btn {
@@ -91,6 +97,7 @@ code {
   border-radius: 20px;
   border: none;
   cursor: pointer;
+  font-family:Verdana
 }
 
 .logout-btn:hover {
